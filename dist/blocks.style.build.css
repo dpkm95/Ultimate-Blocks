@@ -1736,6 +1736,11 @@ https://flickity.metafizzy.co
   margin: 10px auto;
   padding: 0; }
 
+.ub-feature-box .ub-feature img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto; }
+
 .ub-feature-box .ub-feature .ub-feature-title {
   font-size: 30px;
   text-align: center;

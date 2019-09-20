@@ -963,3 +963,7 @@ div[data-block] > .ub_image_slider {
     .ub-styled-box-choices > div > svg {
       display: block;
       margin: 0 auto; }
+    .ub-styled-box-choices > div > p {
+      text-align: center; }
+      .ub-styled-box-choices > div > p:first-of-type {
+        font-weight: 700; }
