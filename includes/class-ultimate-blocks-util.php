@@ -65,26 +65,21 @@ class Ultimate_Blocks_Util {
 				'label'  => 'Divider',
 				'name'   => 'ub/divider',
 				'active' => true,
-			),
-			array(
-				'label'  => 'Feature Box',
-				'name'   => 'ub/feature-box-block',
-				'active' => true,
             ),
+            array(
+				'label'  => 'Expand',
+				'name'   => 'ub/expand',
+				'active' => true,
+			),
             array(
                 'label'  => 'Image Slider',
                 'name'   => 'ub/image-slider',
                 'active' => true,
             ),
-			array(
-				'label'  => 'Notification Box',
-				'name'   => 'ub/notification-box-block',
-				'active' => true,
-			),
-			array(
-				'label'  => 'Number Box',
-				'name'   => 'ub/number-box-block',
-				'active' => true,
+            array(
+                'label'  => 'Post Grid',
+                'name'   => 'ub/post-grid',
+                'active' => true,
             ),
             array(
 				'label'  => 'Progress Bar',
@@ -107,6 +102,11 @@ class Ultimate_Blocks_Util {
 				'active' => true,
             ),
             array(
+				'label'  => 'Styled Box',
+				'name'   => 'ub/styled-box',
+				'active' => true,
+			),
+            array(
 				'label'  => 'Styled List',
 				'name'   => 'ub/styled-list',
 				'active' => true,
@@ -125,12 +125,7 @@ class Ultimate_Blocks_Util {
 				'label'  => 'Testimonial',
 				'name'   => 'ub/testimonial',
 				'active' => true,
-			),
-            array(
-                'label'  => 'Post Grig',
-                'name'   => 'ub/post-grid',
-                'active' => true,
-            )
+			)
 		];
 	}
 

@@ -8,7 +8,7 @@ const {
 	URLInput,
 	BlockControls,
 	PanelColorSettings
-} = wp.editor;
+} = wp.blockEditor || wp.editor;
 
 const {
 	PanelBody,
@@ -16,7 +16,9 @@ const {
 	IconButton,
 	Toolbar,
 	RangeControl,
-	CheckboxControl
+	CheckboxControl,
+	ToggleControl,
+	SelectControl
 } = wp.components;
 
 export const blockControls = props => {
@@ -77,13 +79,23 @@ export const inspectorControls = props => {
 		buttonColor,
 		buttonTextColor,
 		addNofollow,
-		openInNewTab
+		openInNewTab,
+		useHeadingTag,
+		selectedHeadingTag
 	} = attributes;
+
+	const headingTagOptions = [
+		{ value: 'h2', label: __('H2', 'ultimate-blocks') },
+		{ value: 'h3', label: __('H3', 'ultimate-blocks') },
+		{ value: 'h4', label: __('H4', 'ultimate-blocks') },
+		{ value: 'h5', label: __('H5', 'ultimate-blocks') },
+		{ value: 'h6', label: __('H6', 'ultimate-blocks') }
+	];
 
 	return (
 		<InspectorControls>
 			<PanelColorSettings
-				title={__('Color Settings')}
+				title={__('Color Settings', 'ultimate-blocks')}
 				initialOpen={false}
 				colorSettings={[
 					{
@@ -92,7 +104,7 @@ export const inspectorControls = props => {
 							setAttributes({
 								ctaBackgroundColor: colorValue
 							}),
-						label: __('Background Color')
+						label: __('Background Color', 'ultimate-blocks')
 					},
 					{
 						value: ctaBorderColor,
@@ -100,14 +112,17 @@ export const inspectorControls = props => {
 							setAttributes({
 								ctaBorderColor: colorValue
 							}),
-						label: __('Border Color')
+						label: __('Border Color', 'ultimate-blocks')
 					}
 				]}
 			/>
 
-			<PanelBody title={__('Headline Settings')} initialOpen={false}>
+			<PanelBody
+				title={__('Headline Settings', 'ultimate-blocks')}
+				initialOpen={false}
+			>
 				<RangeControl
-					label={__('Font Size')}
+					label={__('Font Size', 'ultimate-blocks')}
 					value={headFontSize}
 					onChange={value => setAttributes({ headFontSize: value })}
 					min={10}
@@ -115,7 +130,26 @@ export const inspectorControls = props => {
 					beforeIcon="editor-textcolor"
 					allowReset
 				/>
-				<p>{__('Color')}</p>
+				{typeof useHeadingTag !== 'undefined' && (
+					<ToggleControl
+						label={__('Use Heading Tag', 'ultimate-blocks')}
+						checked={useHeadingTag}
+						onChange={_ =>
+							setAttributes({ useHeadingTag: !useHeadingTag })
+						}
+					/>
+				)}
+				{useHeadingTag && (
+					<SelectControl
+						label={__('Select Heading Tag', 'ultimate-blocks')}
+						options={headingTagOptions}
+						value={selectedHeadingTag}
+						onChange={selectedHeadingTag =>
+							setAttributes({ selectedHeadingTag })
+						}
+					/>
+				)}
+				<p>{__('Color', 'ultimate-blocks')}</p>
 				<ColorPalette
 					value={headColor}
 					onChange={colorValue =>
@@ -124,9 +158,12 @@ export const inspectorControls = props => {
 				/>
 			</PanelBody>
 
-			<PanelBody title={__('Content Settings')} initialOpen={false}>
+			<PanelBody
+				title={__('Content Settings', 'ultimate-blocks')}
+				initialOpen={false}
+			>
 				<RangeControl
-					label={__('Font Size')}
+					label={__('Font Size', 'ultimate-blocks')}
 					value={contentFontSize}
 					onChange={value =>
 						setAttributes({ contentFontSize: value })
@@ -136,7 +173,7 @@ export const inspectorControls = props => {
 					beforeIcon="editor-textcolor"
 					allowReset
 				/>
-				<p>{__('Color')}</p>
+				<p>{__('Color', 'ultimate-blocks')}</p>
 				<ColorPalette
 					value={contentColor}
 					onChange={colorValue =>
@@ -147,9 +184,12 @@ export const inspectorControls = props => {
 				/>
 			</PanelBody>
 
-			<PanelBody title={__('Button Settings')} initialOpen={false}>
+			<PanelBody
+				title={__('Button Settings', 'ultimate-blocks')}
+				initialOpen={false}
+			>
 				<RangeControl
-					label={__('Button Width')}
+					label={__('Button Width', 'ultimate-blocks')}
 					value={buttonWidth}
 					onChange={value => setAttributes({ buttonWidth: value })}
 					min={10}
@@ -159,7 +199,7 @@ export const inspectorControls = props => {
 				/>
 
 				<RangeControl
-					label={__('Font Size')}
+					label={__('Font Size', 'ultimate-blocks')}
 					value={buttonFontSize}
 					onChange={value => setAttributes({ buttonFontSize: value })}
 					min={10}
@@ -167,7 +207,7 @@ export const inspectorControls = props => {
 					beforeIcon="editor-textcolor"
 					allowReset
 				/>
-				<p>{__('Button Color')}</p>
+				<p>{__('Button Color', 'ultimate-blocks')}</p>
 				<ColorPalette
 					value={buttonColor}
 					onChange={colorValue =>
@@ -175,7 +215,7 @@ export const inspectorControls = props => {
 					}
 				/>
 
-				<p>{__('Button Text Color')}</p>
+				<p>{__('Button Text Color', 'ultimate-blocks')}</p>
 				<ColorPalette
 					value={buttonTextColor}
 					onChange={colorValue =>
@@ -185,14 +225,17 @@ export const inspectorControls = props => {
 					}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Link Settings')} initialOpen={false}>
+			<PanelBody
+				title={__('Link Settings', 'ultimate-blocks')}
+				initialOpen={false}
+			>
 				<CheckboxControl
-					label={__('Add Nofollow to Link')}
+					label={__('Add Nofollow to Link', 'ultimate-blocks')}
 					checked={addNofollow}
 					onChange={_ => setAttributes({ addNofollow: !addNofollow })}
 				/>
 				<CheckboxControl
-					label={__('Open Link in New Tab')}
+					label={__('Open Link in New Tab', 'ultimate-blocks')}
 					checked={openInNewTab}
 					onChange={_ =>
 						setAttributes({ openInNewTab: !openInNewTab })
@@ -222,7 +265,8 @@ export const editorDisplay = props => {
 		buttonTextColor,
 		ub_call_to_action_headline_text,
 		ub_cta_content_text,
-		ub_cta_button_text
+		ub_cta_button_text,
+		useHeadingTag
 	} = attributes;
 	return (
 		<Fragment>
@@ -236,8 +280,11 @@ export const editorDisplay = props => {
 			>
 				<div className="ub_call_to_action_headline">
 					<RichText
-						tagName="p"
-						placeholder={__('CTA Title Goes Here')}
+						tagName={useHeadingTag ? 'h2' : 'p'}
+						placeholder={__(
+							'CTA Title Goes Here',
+							'ultimate-blocks'
+						)}
 						className="ub_call_to_action_headline_text"
 						style={{
 							fontSize: headFontSize + 'px',
@@ -259,7 +306,10 @@ export const editorDisplay = props => {
 				<div className="ub_call_to_action_content">
 					<RichText
 						tagName="p"
-						placeholder={__('Add Call to Action Text Here')}
+						placeholder={__(
+							'Add Call to Action Text Here',
+							'ultimate-blocks'
+						)}
 						className="ub_cta_content_text"
 						style={{
 							fontSize: contentFontSize + 'px',
@@ -287,7 +337,7 @@ export const editorDisplay = props => {
 					>
 						<RichText
 							tagName="p"
-							placeholder={__('Button Text')}
+							placeholder={__('Button Text', 'ultimate-blocks')}
 							className="ub_cta_button_text"
 							style={{
 								color: buttonTextColor,
@@ -317,6 +367,7 @@ export const editorDisplay = props => {
 							<Icon icon="admin-links" />
 						</div>
 						<URLInput
+							autoFocus={false}
 							className="button-url"
 							value={props.attributes.url}
 							onChange={value => setAttributes({ url: value })}
@@ -326,7 +377,7 @@ export const editorDisplay = props => {
 						/>
 						<IconButton
 							icon={'editor-break'}
-							label={__('Apply')}
+							label={__('Apply', 'ultimate-blocks')}
 							type={'submit'}
 						/>
 					</form>

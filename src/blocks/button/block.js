@@ -6,11 +6,7 @@
  */
 
 //Import Icon
-import icon from './icons/icons';
-
-//  Import CSS.
-import './style.scss';
-import './editor.scss';
+import icon from "./icons/icons";
 
 import {
 	version_1_1_2,
@@ -19,21 +15,21 @@ import {
 	version_2_0_0,
 	oldAttributes,
 	updateFrom
-} from './oldVersions';
+} from "./oldVersions";
 
 import {
 	generateIcon,
 	dashesToCamelcase,
 	mergeRichTextArray,
 	upgradeButtonLabel
-} from '../../common';
+} from "../../common";
 import {
 	blockControls,
 	inspectorControls,
 	editorDisplay,
 	iconSize,
 	allIcons
-} from './components';
+} from "./components";
 
 const { withDispatch, withSelect } = wp.data;
 
@@ -57,72 +53,80 @@ const { registerBlockType, createBlock } = wp.blocks;
 
 const attributes = {
 	blockID: {
-		type: 'string',
-		default: ''
+		type: "string",
+		default: ""
 	},
 	buttonText: {
-		type: 'string',
-		default: 'Button Text'
+		type: "string",
+		default: "Button Text"
 	},
 	align: {
-		type: 'string',
-		default: 'center'
+		type: "string",
+		default: "center"
 	},
 	url: {
-		type: 'string',
-		default: ''
+		type: "string",
+		default: ""
 	},
 	size: {
-		type: 'string',
-		default: 'medium'
+		type: "string",
+		default: "medium"
 	},
 	buttonColor: {
-		type: 'string',
-		default: '#313131'
+		type: "string",
+		default: "#313131"
 	},
 	buttonHoverColor: {
-		type: 'string',
-		default: '#313131'
+		type: "string",
+		default: "#313131"
 	},
 	buttonTextColor: {
-		type: 'string',
-		default: '#ffffff'
+		type: "string",
+		default: "#ffffff"
 	},
 	buttonTextHoverColor: {
-		type: 'string',
-		default: '#ffffff'
+		type: "string",
+		default: "#ffffff"
 	},
 	buttonRounded: {
-		type: 'boolean',
+		type: "boolean",
 		default: false
 	},
 	chosenIcon: {
-		type: 'string',
-		default: ''
+		type: "string",
+		default: ""
 	},
 	iconPosition: {
-		type: 'string',
-		default: 'left'
+		type: "string",
+		default: "left"
 	},
 	buttonIsTransparent: {
-		type: 'boolean',
+		type: "boolean",
 		default: false
 	},
 	addNofollow: {
-		type: 'boolean',
+		type: "boolean",
 		default: true
 	},
 	openInNewTab: {
-		type: 'boolean',
+		type: "boolean",
 		default: true
+	},
+	buttonWidth: {
+		type: "string",
+		default: "fixed"
 	}
 };
 
-registerBlockType('ub/button-block', {
-	title: __('Button (Improved)'),
+registerBlockType("ub/button-block", {
+	title: __("Button (Improved)", "ultimate-blocks"),
 	icon: icon,
-	category: 'ultimateblocks',
-	keywords: [__('Button'), __('Buttons'), __('Ultimate Blocks')],
+	category: "ultimateblocks",
+	keywords: [
+		__("Button", "ultimate-blocks"),
+		__("Buttons", "ultimate-blocks"),
+		__("Ultimate Blocks", "ultimate-blocks")
+	],
 	/**
 	 * The edit function describes the structure of your block in the context of the editor.
 	 * This represents what the editor will render when the block is used.
@@ -139,21 +143,17 @@ registerBlockType('ub/button-block', {
 		withState({
 			isMouseHovered: false,
 			availableIcons: [],
-			iconSearchTerm: ''
+			iconSearchTerm: ""
 		}),
-		withSelect((select, ownProps) => {
-			const { getBlock } = select('core/editor');
-
-			const { clientId } = ownProps;
-
-			return {
-				block: getBlock(clientId)
-			};
-		}),
-		withDispatch(dispatch => {
-			const { replaceBlock } = dispatch('core/editor');
-			return { replaceBlock };
-		})
+		withSelect((select, ownProps) => ({
+			block: (select("core/block-editor") || select("core/editor")).getBlock(
+				ownProps.clientId
+			)
+		})),
+		withDispatch(dispatch => ({
+			replaceBlock: (dispatch("core/block-editor") || dispatch("core/editor"))
+				.replaceBlock
+		}))
 	])(function(props) {
 		const {
 			isSelected,
@@ -181,11 +181,9 @@ registerBlockType('ub/button-block', {
 						replaceBlock(
 							block.clientId,
 							createBlock(
-								'ub/button',
+								"ub/button",
 								Object.assign(otherAttributes, {
-									buttonText: mergeRichTextArray(
-										attributes.buttonText
-									)
+									buttonText: mergeRichTextArray(attributes.buttonText)
 								})
 							)
 						);
@@ -226,14 +224,12 @@ registerBlockType('ub/button-block', {
 
 		return (
 			<div
-				className={`${
-					props.className
-				} ub-button-container align-button-${align}`}
+				className={`${props.className} ub-button-container align-button-${align}`}
 			>
 				<a
 					href={url}
-					target={openInNewTab ? '_blank' : '_self'}
-					rel={`noopener noreferrer${addNofollow ? ' nofollow' : ''}`}
+					target={openInNewTab ? "_blank" : "_self"}
+					rel={`noopener noreferrer${addNofollow ? " nofollow" : ""}`}
 					className={`ub-button-block-main ub-button-${size}`}
 					data-defaultColor={buttonColor}
 					data-defaultTextColor={buttonTextColor}
@@ -241,41 +237,28 @@ registerBlockType('ub/button-block', {
 					data-hoverTextColor={buttonTextHoverColor}
 					data-buttonIsTransparent={buttonIsTransparent}
 					style={{
-						backgroundColor: buttonIsTransparent
-							? 'transparent'
-							: buttonColor,
-						color: buttonIsTransparent
-							? buttonColor
-							: buttonTextColor,
-						borderRadius: buttonRounded ? '60px' : '0px',
-						border: buttonIsTransparent
-							? `3px solid ${buttonColor}`
-							: 'none'
+						backgroundColor: buttonIsTransparent ? "transparent" : buttonColor,
+						color: buttonIsTransparent ? buttonColor : buttonTextColor,
+						borderRadius: buttonRounded ? "60px" : "0px",
+						border: buttonIsTransparent ? `3px solid ${buttonColor}` : "none"
 					}}
 				>
 					<div
 						className="ub-button-content-holder"
 						style={{
-							flexDirection:
-								iconPosition === 'left' ? 'row' : 'row-reverse'
+							flexDirection: iconPosition === "left" ? "row" : "row-reverse"
 						}}
 					>
-						{chosenIcon !== '' &&
-							allIcons.hasOwnProperty(
-								`fa${dashesToCamelcase(chosenIcon)}`
-							) && (
+						{chosenIcon !== "" &&
+							allIcons.hasOwnProperty(`fa${dashesToCamelcase(chosenIcon)}`) && (
 								<span className="ub-button-icon-holder">
 									{generateIcon(
-										allIcons[
-											`fa${dashesToCamelcase(chosenIcon)}`
-										],
+										allIcons[`fa${dashesToCamelcase(chosenIcon)}`],
 										iconSize[size]
 									)}
 								</span>
 							)}
-						<span className={'ub-button-block-btn'}>
-							{buttonText}
-						</span>
+						<span className={"ub-button-block-btn"}>{buttonText}</span>
 					</div>
 				</a>
 			</div>
@@ -289,27 +272,27 @@ registerBlockType('ub/button-block', {
 	]
 });
 
-registerBlockType('ub/button', {
-	title: __('Button (Improved)'),
+registerBlockType("ub/button", {
+	title: __("Button (Improved)", "ultimate-blocks"),
 	icon: icon,
-	category: 'ultimateblocks',
+	category: "ultimateblocks",
 	attributes,
-	keywords: [__('Button'), __('Buttons'), __('Ultimate Blocks')],
+	keywords: [
+		__("Button", "ultimate-blocks"),
+		__("Buttons", "ultimate-blocks"),
+		__("Ultimate Blocks", "ultimate-blocks")
+	],
 	edit: compose([
 		withState({
 			isMouseHovered: false,
 			availableIcons: [],
-			iconSearchTerm: ''
+			iconSearchTerm: ""
 		}),
-		withSelect((select, ownProps) => {
-			const { getBlock } = select('core/editor');
-
-			const { clientId } = ownProps;
-
-			return {
-				block: getBlock(clientId)
-			};
-		})
+		withSelect((select, ownProps) => ({
+			block: (select("core/block-editor") || select("core/editor")).getBlock(
+				ownProps.clientId
+			)
+		}))
 	])(function(props) {
 		const { isSelected, setState, availableIcons, block } = props;
 

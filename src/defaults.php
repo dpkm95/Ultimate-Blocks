@@ -62,6 +62,10 @@ $defaultValues = array(
             'openInNewTab' => array(
                 'type' => 'boolean',
                 'default'=> true
+            ),
+            'buttonWidth' => array(
+                'type' => 'string',
+                'default' => 'fixed'
             )
         )
     ),
@@ -146,6 +150,14 @@ $defaultValues = array(
             'openInNewTab' => array(
                 'type' => 'boolean',
                 'default' => false
+            ),
+            'useHeadingTag' => array(
+                'type' => 'boolean',
+                'default' => false
+            ),
+            'selectedHeadingTag' => array(
+                'type' => 'string',
+                'default' => 'h2'
             )
         )
     ),
@@ -214,11 +226,19 @@ $defaultValues = array(
             'hasFAQSchema' => array(
                 'type' => 'boolean',
                 'default' => false
+            ),
+            'preventCollapse' => array(
+                'type' => 'boolean',
+                'default' => false
             )
         )
     ),
     'ub/content-toggle-panel-block' => array(
         'attributes' => array(
+            'parentID' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
             'theme' => array(
                 'type' => 'string',
                 'default' => '#f63d3d'
@@ -234,6 +254,14 @@ $defaultValues = array(
             'panelTitle' => array(
                 'type' => 'string',
                 'default' => ''
+            ),
+            'titleTag' => array(
+                'type' => 'string',
+                'default' => 'p'
+            ),
+            'preventCollapse' => array(
+                'type' => 'boolean',
+                'default' => false
             )
         )
     ),
@@ -298,6 +326,10 @@ $defaultValues = array(
             'initialShow' => array(
                 'type' => 'boolean',
                 'default' => false
+            ),
+            'toggleAlign'=> array(
+                'type' => 'string',
+                'default' => 'left'
             )
         )
     ),
@@ -434,7 +466,7 @@ $defaultValues = array(
                 'default' => '[]'
             ),
             'descriptions' => array(
-                'type' => 'string',
+                'type' => 'array',
                 'default' => array()
             ),
             'wrapsAround' => array(
@@ -613,6 +645,34 @@ $defaultValues = array(
                 'type' => 'string',
                 'default' => ''
             ),
+            'description' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'enableDescription' => array(
+                'type' => 'boolean',
+                'default' => false,
+            ),
+            'descriptionAlign' => array(
+                'type' => 'string',
+                'default' => 'left'
+            ),
+            'imgURL' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'imgID' => array(
+                'type' => 'number',
+                'default' => -1
+            ),
+            'imgAlt' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'enableImage' => array(
+                'type' => 'boolean',
+                'default' => false
+            ),
             'items' => array(
                 'type' => 'string',
                 'default' => '[{"label": "", "value": 0}]'
@@ -653,6 +713,7 @@ $defaultValues = array(
                 'type' => 'string',
                 'default' => '#eeee00'
             ),
+            //retained for backwards compatibility
             'selectedStarColor' => array(
                 'type' => 'string',
                 'default' => '#ffff00'
@@ -676,6 +737,66 @@ $defaultValues = array(
             'ctaOpenInNewTab' => array(
                 'type' => 'boolean',
                 'default' => true
+            ),
+            'enableReviewSchema' => array(
+                'type' => 'boolean',
+                'default' => true
+            ),
+            'starOutlineColor' => array(
+                'type' => 'string',
+                'default' => '#000000'
+            ),
+            'imageSize' => array(
+                'type' => 'number',
+                'default' => 100
+            ),
+            'brand' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'sku' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'identifier' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'identifierType' => array(
+                'type' => 'string',
+                'default' => 'gtin'
+            ),
+            'offerType' => array(
+                'type' => 'string',
+                'default' => 'Offer'
+            ),
+            'offerStatus' => array(
+                'type' => 'string',
+                'default' => 'InStock'
+            ),
+            'offerHighPrice' => array(
+                'type' => 'number',
+                'default' => 0
+            ),
+            'offerLowPrice' => array(
+                'type' => 'number',
+                'default' => 0
+            ),
+            'offerCount' => array(
+                'type' => 'number',
+                'default' => 1
+            ),
+            'offerPrice' => array(
+                'type' => 'number',
+                'default' => 0
+            ),
+            'offerCurrency' => array(
+                'type' => 'string',
+                'default' => 'USD'
+            ),
+            'offerExpiry' => array(
+                'type' => 'number',
+                'default' => time() + 10800
             )
         )
     ),
@@ -832,6 +953,44 @@ $defaultValues = array(
             )
         )
     ),
+    'ub/styled-list' => array(
+        'attributes' => array(
+            'alignment' => array(
+                'type' => 'string',
+                'default' => 'left'
+            ),
+            'blockID' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'list' => array(
+                'type' => 'text',
+                'default' => '<li>Item 1</li><li>Item 2</li><li>Item 3</li>'
+            ),
+            'listItem' => array(
+                'type' => 'array',
+                'default' => array_fill(0, 3,
+                    array(
+                        'text' => '',
+                        'selectedIcon' => 'check',
+                        'indent' => 0
+                    )
+                )
+            ),
+            'selectedIcon' => array(
+                'type' => 'string',
+                'default' => 'check'
+            ),
+            'iconColor' => array(
+                'type' => 'string',
+                'default' => '#000000'
+            ),
+            'iconSize' => array(
+                'type' => 'number',
+                'default' => 5
+            )
+        )
+    ),
     'ub/tabbed-content-block' => array(
         'attributes' => array(
             'blockID' => array(
@@ -867,6 +1026,10 @@ $defaultValues = array(
                 'items' => array(
                     'type' => 'string'
                 )
+            ),
+            'tabVertical' => array(
+                'type' => 'boolean',
+                'default' => false
             )
         )
     ),
@@ -910,6 +1073,17 @@ $defaultValues = array(
             'enableSmoothScroll' => array(
                 'type' => 'boolean',
                 'default' => false
+            ),
+            'titleAlignment' => array(
+                'type' => 'string',
+                'default' => 'left'
+            ),
+            'gaps' => array(
+                'type' => 'array',
+                'default' => array(),
+                'items' => array(
+                    'type' => 'number'
+                )
             )
         )
     ),
@@ -975,73 +1149,73 @@ $defaultValues = array(
                 'type' => 'string',
                 'default' => ''
             ),
-            'categories'          => array(
+            'categories' => array(
                 'type' => 'string',
             ),
-            'className'           => array(
+            'className' => array(
                 'type' => 'string',
             ),
-            'postsShow'         => array(
+            'amountPosts' => array(
                 'type'    => 'number',
                 'default' => 6,
             ),
-            'displayPostDate'     => array(
+            'checkPostDate' => array(
                 'type'    => 'boolean',
                 'default' => true,
             ),
-            'displayPostExcerpt'  => array(
+            'checkPostExcerpt' => array(
                 'type'    => 'boolean',
                 'default' => true,
             ),
-            'displayPostAuthor'   => array(
+            'checkPostAuthor' => array(
                 'type'    => 'boolean',
                 'default' => true,
             ),
-            'displayPostImage'    => array(
+            'checkPostImage'    => array(
                 'type'    => 'boolean',
                 'default' => true,
             ),
-            'displayPostLink'     => array(
+            'checkPostLink' => array(
                 'type'    => 'boolean',
                 'default' => true,
             ),
-            'displayPostTitle'    => array(
+            'checkPostTitle' => array(
                 'type'    => 'boolean',
                 'default' => true,
             ),
-            'postLayout'          => array(
+            'postLayout' => array(
                 'type'    => 'string',
                 'default' => 'grid',
             ),
-            'columns'             => array(
+            'columns' => array(
                 'type'    => 'number',
                 'default' => 2,
             ),
-            'width'               => array(
+            'width' => array(
                 'type'    => 'string',
                 'default' => 'wide',
             ),
-            'order'               => array(
+            'order' => array(
                 'type'    => 'string',
                 'default' => 'desc',
             ),
-            'orderBy'             => array(
+            'orderBy' => array(
                 'type'    => 'string',
                 'default' => 'date',
             ),
-            'readMoreText'        => array(
+            'readMoreText' => array(
                 'type'    => 'string',
                 'default' => 'Continue Reading',
             ),
-            'offset'              => array(
+            'offset' => array(
                 'type'    => 'number',
                 'default' => 0,
             ),
-            'excerptLength'       => array(
+            'excerptLength' => array(
                 'type'    => 'number',
                 'default' => 55,
             ),
-            'postType'            => array(
+            'postType' => array(
                 'type'    => 'string',
                 'default' => 'post',
             ),

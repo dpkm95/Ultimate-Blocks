@@ -3,8 +3,8 @@
  *
  * CSS for both Frontend+Backend.
  */
-@import '../../common';
 
+@import "../../common";
 .wp-block-ub-content-toggle {
 	margin: 20px 0 20px 0;
 	max-width: 100%;
@@ -18,7 +18,6 @@
 		padding: 10px 10px 10px 25px;
 		color: white;
 		margin: 0;
-		font-size: 18px;
 		display: block;
 	}
 	.wp-block-ub-content-toggle-accordion-content {
@@ -82,4 +81,21 @@
 .wp-block-ub-content-toggle-accordion-content-wrap {
 	padding: 13px 4%;
 	overflow: hidden;
+}
+
+@media (max-width: 479.98px) {
+	.wp-block-ub-content-toggle-accordion
+		.wp-block-ub-content-toggle-accordion-title {
+		padding: 10px;
+	}
+}
+
+@media (max-width: 374.98px) {
+	.wp-block-ub-content-toggle-accordion
+		.wp-block-ub-content-toggle-accordion-title {
+		padding: 10px 0 10px 10px;
+	}
+	.wp-block-ub-content-toggle-accordion-content-wrap p {
+		margin: 15px 0 10px;
+	}
 }

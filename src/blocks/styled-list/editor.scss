@@ -7,6 +7,7 @@
 }
 
 .editor-styles-wrapper .ub-styled-list {
+	display: flex;
 	ul {
 		margin-left: 2.5em;
 	}
@@ -29,4 +30,5 @@
 	position: absolute;
 	top: 0;
 	right: 0;
+	line-height: 2;
 }

@@ -1,9 +1,9 @@
-=== Gutenberg Blocks Plugin - Ultimate Blocks ===
+=== Ultimate Blocks - Gutenberg Blocks Plugin ===
 Contributors: ultimateblocks, imtiazrayhan, istiakrayhan, alexius08, wpleaders1, wpcdplugin
 Tags: blocks, gutenberg blocks, gutenberg, editor
 Requires at least: 5.0
-Tested up to: 5.2
-Stable tag: 2.1.4
+Tested up to: 5.3
+Stable tag: 2.2.1
 Requires PHP: 5.6
 License: GPL3+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -22,14 +22,15 @@ Ultimate Blocks currently includes the following blocks:
 * Tabbed Content - [View Demo](https://ultimateblocks.com/tabbed-content-block/)
 * Call to Action - [View Demo](https://ultimateblocks.com/call-to-action-block/)
 * Content Toggle (Accordion) - [View Demo](https://ultimateblocks.com/content-toggle-accordion-block/)
-* Feature Box - [View Demo](https://ultimateblocks.com/feature-box-block/)
-* Notification Box - [View Demo](https://ultimateblocks.com/notification-box-block/)
-* Number Box - [View Demo](https://ultimateblocks.com/number-box-block/)
+* Styled Box - [View Demo](https://ultimateblocks.com/styled-box-block/)
+* Styled List - [View Demo](https://ultimateblocks.com/styled-list-block/)
+* Expand - [View Demo](https://ultimateblocks.com/expand-block/)
 * Testimonial - [View Demo](https://ultimateblocks.com/testimonial-block/)
 * Click to Tweet - [View Demo](https://ultimateblocks.com/click-to-tweet-block/)
 * Social Share - [View Demo](https://ultimateblocks.com/social-share-block/)
 * Countdown - [View Demo](https://ultimateblocks.com/countdown-block/)
 * Progress Bar - [View Demo](https://ultimateblocks.com/progress-bar-block/)
+* Post Grid - [View Demo](https://ultimateblocks.com/post-grid-block/)
 * Star Rating - [View Demo](https://ultimateblocks.com/star-rating-block/)
 * Image Slider - [View Demo](https://ultimateblocks.com/image-slider-block/)
 * Button (Improved) - [View Demo](https://ultimateblocks.com/improved-button-block/)
@@ -63,14 +64,14 @@ Add a nice call to action box with a button. Encourage users to take action, eng
 **Content Toggle**
 Add contents in accordions. Let visitors expand them and show the content.
 
-**Feature Box Block**
-Add boxes with images. Highlight the features of any product or service. 3 columns options.
+**Styled Box Block**
+Add styled box like - Notification box, Number box, Feature box in your content. Three templates now, more in the making.
 
-**Notification Box Block**
-Highlight important information in your posts/pages. Comes in three different designs.
+**Styled List Block**
+This block lets you add a styled list in your post or pages. Instead of bullets you can use various icons as your list style type. You can also choose color for icons.
 
-**Number Box Block**
-Lets you add numbered boxes. Enlist steps of any procedures or features, characteristics, benefits of products or services. 3 columns options.
+**Expand Block**
+Expand Block lets you add expandable content. You can hide some part of your content initially. Upon clicking on 'Show More' it will show. It can be hidden again.
 
 **Testimonial Block**
 Nice, simple testimonial box with option to add image, name, role of the testimonial author.
@@ -86,6 +87,9 @@ Add a countdown in your post/pages. Comes with three different styles.
 
 **Progress Bar Block**
 Add Cirle/Line Progress bar with this blocks. Comes with options to change thickness, color.
+
+**Post Grid Block**
+Add a list or grid of your posts. Comes with options to change categories, order and many more.
 
 **Star Rating Block**
 Add Star ratings in your posts/pages. You can customize size, color, numbers of stars.
@@ -122,6 +126,124 @@ That's it. You're done!
 3. Tabbed Content Block.
 
 == Changelog ==
+
+= 2.2.1 =
+
+Release Date: February 12th, 2020
+
+* ADD: Option to add schema-exclusive attributes in Review block.
+* ADD: Table of Contentns anchor links work when page breaks are included in post.
+* FIX: Bottom margin issue in Image Slider.
+* FIX: Frontend script issues when Image Slider is nested within other blocks.
+* FIX: Image display issue when they are inside picture tags in Image Slider.
+* FIX: Frontend script error during panel height calculation in Content Toggle.
+* FIX: Average review rating display in editor in Review Block.
+* FIX: Post Grid error that comes up when PHP 7.4 is used.
+* REMOVE: Font size specification for Content Toggle title.
+* UPDATE: Translation .pot file.
+
+= 2.2.0 =
+
+Release Date: January 14th, 2020
+
+* ADD: Prevent Filter selection reset when only one filter is selected in Content Filter Block.
+* ADD: Allow customizing tag used for toggle title in Content Toggle (Accordion) Block.
+* ADD: Option for preventing panels from being toggled in Content Toggle Block.
+* ADD: Allow resizing of review image in Review Block.
+* FIX: Display issue when image slider is inside content filter, content toggle, expand, tabbed content.
+* FIX: Display issue when selecting inline images in Review Block.
+* FIX: Move image and description in review JSONLD to under itemReviewed for Review Block.
+* FIX: Alignment bug in Styled List Block.
+* FIX: Default Alignment in Editor for Table of Contents Block.
+* FIX: Frontend script bug when nested Tabbed Content Blocks are present.
+* FIX: Default frontend alignment for Table of Contents block.
+* FIX: Block Manager bug.
+* FIX: PHP errors when CSS files are absent in uploads folder.
+* REMOVE: Unused FontAwesome CSS in Styled List Block.
+
+= 2.1.9 =
+
+Release Date: December 12th, 2019
+
+* ADD: CSS File generation for only active only blocks.
+* ADD: Option to Change List Alignment in Styled List block.
+* FIX: Content Toggle Block issue - line breaks not preserving on the frontend.
+* FIX: Ensure boolean values for boolean Post Grid attributes.
+* UPDATE: FontAwesome to version 5.11.
+
+= 2.1.8 =
+
+Release Date: November 25th, 2019
+
+* ADD: Custom class name option in Expand block.
+* ADD: Image and Description inputs for Review block. Adding these will minimize warnings in Console for the Schema.
+* ADD: Filtering HTML tags from summary, author name and item name in generated Schema to prevent errors.
+* ADD: Editing of Content Toggle panel attributes from any of the child panels.
+* FIX: Content filter frontend script not loading correctly.
+* FIX: Compatibility issues with CodeMirror block in Content Toggle Block.
+* FIX: Double quotes from interfering with generated schema in Content Toggle Block.
+* FIX: Minimum height issue in smaller screen for Image Slider.
+* FIX: Average star value display in Review block.
+* FIX: Issue in Tabbed Content title editing. Now you can edit them easily.
+* FIX: PHP error in 404 pages.
+* FIX: URL input box from automatically getting focus when a block containing one is selected.
+* CHANGE: Removed aggregateRating and added review author property to Review Schema.
+* CHANGE: Display pointer when mouse hovers on button in Review block.
+
+= 2.1.7 = 
+
+Release Date: November 5th, 2019
+
+* FIX: Category filtering not working in Post Grid block.
+* FIX: Rendering of preformatted blocks inside content toggle panels.
+* FIX: Image slider height responsiveness issue.
+* FIX: Styled List item bullet issue on frontend.
+* FIX: Table of Contents animation issues.
+* FIX: Missing attribute in expand block frontend code.
+* FIX: PHP errors in Table of Contents when there are no headings.
+* CHANGE: Ultimate Blocks menu page position.
+
+= 2.1.6 =
+
+Release Date: October 24th, 2019
+
+* NEW: Post Grid Block.
+* NEW: Vertical Tabs in Tabbed Content Block.
+* NEW: Option to Resize Styled List Icon.
+* NEW: Option to Use Heading or Paragraph tag for Call to Action Headline.
+* NEW: Option to Disable Review Schema.
+* NEW: Option to Change Star Outline Color in Review.
+* NEW: Option to Choose Width for Button - Fixed, Flexible, Full.
+* FIX: Review Schema Error in Search Console.
+* FIX: Table of Content Collapsing Animation Issues.
+* FIX: Content Toggle Assets Not Loading.
+* FIX: Alignment of Buttons in Image Slider’s Initial Display.
+* FIX: Style of Dropdown Menu in Progress Bar Block Toolbar.
+* FIX: PHP Errors Caused By Undefined Block Attributes.
+* FIX: JavaScript not Loading for Reusable Blocks.
+* FIX: Leading Extra Preciding "1" in Countdown when JS is disabled.
+* FIX: Expand Block Style.
+* FIX: Table of Contents Indentation in Editor.
+* FIX: Issue with Reusable Blocks in WordPress 5.3 and Gutenberg Plugin.
+* FIX: Responsive issues in Call to Action, Testimonial, Click to Tweet, Content Toggle, Countdown and Tabbed Content.
+* REMOVE: Unused Data Attribute in Content Filter Block.
+* REMOVE: Some Unnecessary CSS.
+
+= 2.1.5 =
+
+Release Date: September 30th, 2019
+
+* NEW: Styled Box Block.
+* NEW: Styled List Block.
+* NEW: Expand Block.
+* NEW: Option to hide Content Filter entries until any filter is selected.
+* FIX: Error in Content Toggle FAQSchema involving link URLs.
+* FIX: Convert JSON attribute in Image Slider and Review block to non-JSON versions.
+* FIX: Adding nofollow in Call to Action’s button.
+* FIX: Frontend icon display in Content Toggle and Tabbed Content.
+* DEPRECATE: Notification Box block, added as a template for Styled Box Block.
+* DEPRECATE: Number Box block, added as a template for Styled Box Block.
+* DEPRECATE: Feature Box block, added as a template for Styled Box Block.
 
 = 2.1.4 =
 

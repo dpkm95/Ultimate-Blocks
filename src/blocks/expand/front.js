@@ -24,15 +24,27 @@ function ub_getSiblings(element, criteria) {
 }
 
 Array.prototype.slice
-	.call(document.getElementsByClassName('ub-expand-toggle-button'))
+	.call(document.getElementsByClassName("ub-expand-toggle-button"))
 	.forEach(instance => {
-		instance.addEventListener('click', () => {
-			const blockRoot = instance.closest('.ub-expand');
+		instance.addEventListener("click", () => {
+			const blockRoot = instance.closest(".ub-expand");
 			blockRoot
-				.querySelector('.ub-expand-partial .ub-expand-toggle-button')
-				.classList.toggle('ub-hide');
-			blockRoot
-				.querySelector('.ub-expand-full')
-				.classList.toggle('ub-hide');
+				.querySelector(".ub-expand-partial .ub-expand-toggle-button")
+				.classList.toggle("ub-hide");
+
+			const expandingPart = Array.prototype.slice
+				.call(blockRoot.children)
+				.filter(child => child.classList.contains("ub-expand-full"))[0];
+
+			expandingPart.classList.toggle("ub-hide");
+
+			let flickityInstances = Array.prototype.slice.call(
+				expandingPart.querySelectorAll(".ub_image_slider")
+			);
+
+			flickityInstances.forEach(instance => {
+				let slider = Flickity.data(instance.querySelector("[data-flickity]"));
+				slider.resize();
+			});
 		});
 	});

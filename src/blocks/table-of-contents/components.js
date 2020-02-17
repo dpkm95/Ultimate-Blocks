@@ -3,9 +3,9 @@ import {
 	twoColumnsIcon,
 	threeColumnsIcon,
 	plainList
-} from './icon';
-import { Component, Fragment } from 'react';
-import { getDescendantBlocks } from '../../common';
+} from "./icon";
+import { Component, Fragment } from "react";
+import { getDescendantBlocks } from "../../common";
 
 const {
 	ToggleControl,
@@ -14,7 +14,8 @@ const {
 	Toolbar,
 	IconButton
 } = wp.components;
-const { InspectorControls, BlockControls, RichText } = wp.editor;
+const { InspectorControls, BlockControls, RichText, AlignmentToolbar } =
+	wp.blockEditor || wp.editor;
 const { select, dispatch, subscribe } = wp.data;
 const { __ } = wp.i18n;
 
@@ -23,26 +24,41 @@ class TableOfContents extends Component {
 		super(props);
 		this.state = {
 			headers: props.headers,
-			unsubscribe: null
+			unsubscribe: null,
+			breaks: []
 		};
 	}
 
 	componentDidMount() {
 		const getHeadingBlocks = _ => {
 			let headings = [];
-			const rootBlocks = select('core/editor').getBlocks();
+
+			let pageNum = 1;
+
+			let pageBreaks = [];
+
+			const rootBlocks = (
+				select("core/block-editor") || select("core/editor")
+			).getBlocks();
 			rootBlocks.forEach(block => {
-				if (block.name === 'core/heading') {
+				if (block.name === "core/heading") {
 					headings.push(block);
+					pageBreaks.push(pageNum);
+				} else if (block.name === "core/nextpage") {
+					pageNum++;
 				} else if (block.innerBlocks.length > 0) {
 					let internalHeadings = getDescendantBlocks(block).filter(
-						block => block.name === 'core/heading'
+						block => block.name === "core/heading"
 					);
 					if (internalHeadings.length > 0) {
 						headings.push(...internalHeadings);
 					}
 				}
 			});
+
+			if (JSON.stringify(this.state.breaks) !== JSON.stringify(pageBreaks)) {
+				this.setState({ breaks: pageBreaks });
+			}
 
 			return headings;
 		};
@@ -52,30 +68,26 @@ class TableOfContents extends Component {
 			headers.forEach((heading, key) => {
 				heading.anchor =
 					key +
-					'-' +
+					"-" +
 					heading.content
 						.toString()
 						.toLowerCase()
-						.replace(/( |<.+?>|&nbsp;)/g, '-');
+						.replace(/( |<.+?>|&nbsp;)/g, "-");
 				heading.anchor = encodeURIComponent(
 					heading.anchor.replace(
 						/[^\w\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF\s-]/g,
-						''
+						""
 					)
 				);
 			});
-			if (
-				JSON.stringify(headers) !== JSON.stringify(this.state.headers)
-			) {
+			if (JSON.stringify(headers) !== JSON.stringify(this.state.headers)) {
 				this.setState({ headers });
 			}
 		};
 
 		setHeadings();
 
-		const unsubscribe = subscribe(() => {
-			setHeadings();
-		});
+		const unsubscribe = subscribe(_ => setHeadings());
 		this.setState({ unsubscribe });
 	}
 
@@ -85,12 +97,14 @@ class TableOfContents extends Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		if (
-			JSON.stringify(prevProps.headers) !==
-			JSON.stringify(prevState.headers)
+			JSON.stringify(prevProps.headers) !== JSON.stringify(prevState.headers)
 		) {
 			this.props.blockProp.setAttributes({
 				links: JSON.stringify(this.state.headers)
 			});
+		}
+		if (this.state.breaks !== this.props.blockProp.attributes.gaps) {
+			this.props.blockProp.setAttributes({ gaps: this.state.breaks });
 		}
 	}
 
@@ -120,9 +134,7 @@ class TableOfContents extends Component {
 
 			origHeaders
 				.filter(header => allowedHeaders[header.level - 1])
-				.forEach(header => {
-					placeItem(array, header);
-				});
+				.forEach(header => placeItem(array, header));
 
 			return array;
 		};
@@ -133,17 +145,16 @@ class TableOfContents extends Component {
 					<a
 						href={`#${item.anchor}`}
 						dangerouslySetInnerHTML={{
-							__html: item.content.replace(/(<.+?>)/g, '')
+							__html: item.content.replace(/(<.+?>)/g, "")
 						}}
 					/>
 					{item.children &&
-						(listStyle === 'numbered' ? (
+						(listStyle === "numbered" ? (
 							<ol>{parseList(item.children)}</ol>
 						) : (
 							<ul
 								style={{
-									listStyle:
-										listStyle === 'plain' ? 'none' : null
+									listStyle: listStyle === "plain" ? "none" : null
 								}}
 							>
 								{parseList(item.children)}
@@ -154,20 +165,19 @@ class TableOfContents extends Component {
 
 		if (
 			headers.length > 0 &&
-			headers.filter(header => allowedHeaders[header.level - 1]).length >
-				0
+			headers.filter(header => allowedHeaders[header.level - 1]).length > 0
 		) {
 			return (
 				<div
 					style={style}
 					className={`ub_table-of-contents-container ub_table-of-contents-${numColumns}-column`}
 				>
-					{listStyle === 'numbered' ? (
+					{listStyle === "numbered" ? (
 						<ol>{parseList(makeHeaderArray(headers))}</ol>
 					) : (
 						<ul
 							style={{
-								listStyle: listStyle === 'plain' ? 'none' : null
+								listStyle: listStyle === "plain" ? "none" : null
 							}}
 						>
 							{parseList(makeHeaderArray(headers))}
@@ -179,9 +189,7 @@ class TableOfContents extends Component {
 			return (
 				blockProp && (
 					<p className="ub_table-of-contents-placeholder">
-						{__(
-							'Add a header to begin generating the table of contents'
-						)}
+						{__("Add a header to begin generating the table of contents")}
 					</p>
 				)
 			);
@@ -197,17 +205,21 @@ export const inspectorControls = props => {
 		allowToCHiding,
 		enableSmoothScroll
 	} = attributes;
+
+	const { updateBlockAttributes } =
+		dispatch("core/block-editor") || dispatch("core/editor");
+	const { getBlocks } = select("core/block-editor") || select("core/editor");
+
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Allowed Headers')} initialOpen={true}>
+			<PanelBody title={__("Allowed Headers")} initialOpen={true}>
 				{allowedHeaders.map((a, i) => (
 					<PanelRow>
-						<label htmlFor={`ub_toggle_h${i + 1}`}>{`H${i +
-							1}`}</label>
+						<label htmlFor={`ub_toggle_h${i + 1}`}>{`H${i + 1}`}</label>
 						<ToggleControl
 							id={`ub_toggle_h${i + 1}`}
 							checked={a}
-							onChange={() =>
+							onChange={_ =>
 								setAttributes({
 									allowedHeaders: [
 										...allowedHeaders.slice(0, i),
@@ -220,60 +232,53 @@ export const inspectorControls = props => {
 					</PanelRow>
 				))}
 			</PanelBody>
-			<PanelBody title={__('Additional Settings')} initialOpen={true}>
+			<PanelBody title={__("Additional Settings")} initialOpen={true}>
 				<PanelRow>
 					<label htmlFor="ub_toc_toggle_display">
 						{__(
-							'Allow users to toggle the visibility of the table of contents'
+							"Allow users to toggle the visibility of the table of contents"
 						)}
 					</label>
 					<ToggleControl
 						id="ub_toc_toggle_display"
 						checked={allowToCHiding}
-						onChange={allowToCHiding => {
+						onChange={allowToCHiding =>
 							setAttributes({
 								allowToCHiding,
 								showList: allowToCHiding ? showList : true
-							});
-						}}
+							})
+						}
 					/>
 				</PanelRow>
 				{allowToCHiding && (
 					<PanelRow>
 						<label htmlFor="ub_show_toc">
-							{__('Initially Show Table of Contents')}
+							{__("Initially Show Table of Contents")}
 						</label>
 						<ToggleControl
 							id="ub_show_toc"
 							checked={showList}
-							onChange={() => {
+							onChange={_ =>
 								setAttributes({
 									showList: !showList
-								});
-							}}
+								})
+							}
 						/>
 					</PanelRow>
 				)}
 				<PanelRow>
-					<label htmlFor="ub_toc_smoothscroll">
-						Enable smooth scrolling
-					</label>
+					<label htmlFor="ub_toc_smoothscroll">Enable smooth scrolling</label>
 					<ToggleControl
 						id="ub_toc_smoothscroll"
 						checked={enableSmoothScroll}
-						onChange={() => {
-							const tocInstances = select('core/editor')
-								.getBlocks()
-								.filter(
-									block =>
-										block.name ===
-										'ub/table-of-contents-block'
-								);
+						onChange={_ => {
+							const tocInstances = getBlocks().filter(
+								block => block.name === "ub/table-of-contents-block"
+							);
 							tocInstances.forEach(instance => {
-								dispatch('core/editor').updateBlockAttributes(
-									instance.clientId,
-									{ enableSmoothScroll: !enableSmoothScroll }
-								);
+								updateBlockAttributes(instance.clientId, {
+									enableSmoothScroll: !enableSmoothScroll
+								});
 							});
 						}}
 					/>
@@ -285,49 +290,55 @@ export const inspectorControls = props => {
 
 export const blockControls = props => {
 	const { setAttributes } = props;
-	const { numColumns } = props.attributes;
+	const { numColumns, titleAlignment } = props.attributes;
 	return (
 		<BlockControls>
 			<Toolbar>
 				<IconButton
-					className={'ub_toc_column_selector'}
+					className={"ub_toc_column_selector"}
 					icon={oneColumnIcon}
-					label={__('One column')}
+					label={__("One column")}
 					isPrimary={numColumns === 1}
-					onClick={() => setAttributes({ numColumns: 1 })}
+					onClick={_ => setAttributes({ numColumns: 1 })}
 				/>
 				<IconButton
-					className={'ub_toc_column_selector'}
+					className={"ub_toc_column_selector"}
 					icon={twoColumnsIcon}
-					label={__('Two columns')}
+					label={__("Two columns")}
 					isPrimary={numColumns === 2}
-					onClick={() => setAttributes({ numColumns: 2 })}
+					onClick={_ => setAttributes({ numColumns: 2 })}
 				/>
 				<IconButton
-					className={'ub_toc_column_selector'}
+					className={"ub_toc_column_selector"}
 					icon={threeColumnsIcon}
-					label={__('Three columns')}
+					label={__("Three columns")}
 					isPrimary={numColumns === 3}
-					onClick={() => setAttributes({ numColumns: 3 })}
+					onClick={_ => setAttributes({ numColumns: 3 })}
 				/>
 			</Toolbar>
 			<Toolbar>
 				<IconButton
 					icon="editor-ul"
-					label={__('Bulleted list')}
-					onClick={() => setAttributes({ listStyle: 'bulleted' })}
+					label={__("Bulleted list")}
+					onClick={_ => setAttributes({ listStyle: "bulleted" })}
 				/>
 				<IconButton
 					icon="editor-ol"
-					label={__('Numbered list')}
-					onClick={() => setAttributes({ listStyle: 'numbered' })}
+					label={__("Numbered list")}
+					onClick={_ => setAttributes({ listStyle: "numbered" })}
 				/>
 				<IconButton
 					icon={plainList}
-					label={__('Plain list')}
-					onClick={() => setAttributes({ listStyle: 'plain' })}
+					label={__("Plain list")}
+					onClick={_ => setAttributes({ listStyle: "plain" })}
 				/>
 			</Toolbar>
+			<AlignmentToolbar
+				value={titleAlignment}
+				onChange={value => {
+					setAttributes({ titleAlignment: value });
+				}}
+			/>
 		</BlockControls>
 	);
 };
@@ -341,14 +352,24 @@ export const editorDisplay = props => {
 		showList,
 		allowToCHiding,
 		numColumns,
-		listStyle
+		listStyle,
+		titleAlignment
 	} = props.attributes;
+
 	return (
 		<Fragment>
-			<div className="ub_table-of-contents-header">
+			<div
+				className="ub_table-of-contents-header"
+				style={{
+					justifySelf:
+						titleAlignment === "center"
+							? "center"
+							: `flex-${titleAlignment === "left" ? "start" : "end"}`
+				}}
+			>
 				<div className="ub_table-of-contents-title">
 					<RichText
-						placeholder={__('Optional title')}
+						placeholder={__("Optional title")}
 						className="ub_table-of-contents-title"
 						onChange={text => setAttributes({ title: text })}
 						value={title}
@@ -362,11 +383,9 @@ export const editorDisplay = props => {
 							<a
 								className="ub_table-of-contents-toggle-link"
 								href="#"
-								onClick={() => {
-									setAttributes({ showList: !showList });
-								}}
+								onClick={_ => setAttributes({ showList: !showList })}
 							>
-								{showList ? __('hide') : __('show')}
+								{showList ? __("hide") : __("show")}
 							</a>
 							]
 						</div>

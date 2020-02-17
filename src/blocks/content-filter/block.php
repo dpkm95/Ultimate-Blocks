@@ -11,8 +11,7 @@ function ub_render_content_filter_entry_block($attributes, $content){
     
     return '<div class="ub-content-filter-panel'.(isset($className) ? ' ' . esc_attr($className) : '').
         ($initiallyShow ? '' : ' ub-hide').'" data-selectedFilters="'.json_encode($selectedFilters).
-        '" data-initiallyShow="'.json_encode($initiallyShow).'">'.
-        $content.'</div>';
+        '">'.$content.'</div>';
 }
 
 function ub_register_content_filter_entry_block(){
@@ -91,14 +90,21 @@ function ub_register_content_filter_block(){
 }
 
 function ub_content_filter_add_frontend_assets() {
-    if ( has_block( 'ub/content-filter' ) or has_block('ub/content-filter-block') ) {
-        wp_enqueue_script(
-            'ultimate_blocks-content-filter-front-script',
-            plugins_url( 'content-filter/front.build.js', dirname( __FILE__ ) ),
-            array( ),
-            Ultimate_Blocks_Constants::plugin_version(),
-            true
-        );
+    require_once dirname(dirname(__DIR__)) . '/common.php';
+
+    $presentBlocks = ub_getPresentBlocks();
+
+    foreach( $presentBlocks as $block ){
+        if($block['blockName'] == 'ub/content-filter' || $block['blockName'] == 'ub/content-filter-block'){
+            wp_enqueue_script(
+                'ultimate_blocks-content-filter-front-script',
+                plugins_url( 'content-filter/front.build.js', dirname( __FILE__ ) ),
+                array( ),
+                Ultimate_Blocks_Constants::plugin_version(),
+                true
+            );
+            break;
+        }
     }
 }
 

@@ -33,24 +33,29 @@ function ub_render_tabbed_content_block($attributes, $contents){
     $tabs = '';
 
     foreach($tabsTitle as $key=>$title){
-        $tabs .= '<div class = "'.$blockName.'-tab-title-wrap'.($activeTab == $key ? ' active' : '').'"'.
+        $tabs .= '<div class = "'.$blockName.'-tab-title-'.($tabVertical ? 'vertical-' : '').'wrap'.($activeTab == $key ? ' active' : '').'"'.
             ($blockID == '' ?' style="background-color: '.($activeTab == $key ? $theme : 'initial')
             .'; border-color: '.($activeTab == $key ? $theme : 'lightgrey').
             '; color: '.($activeTab == $key ? $titleColor : '#000000').';"' :'').'>
             <div class="'.$blockName.'-tab-title">'.$title.'</div></div>';
     }
 
-    return '<div class="'.$blockName.' '.$blockName.'-holder'.(isset($className) ? ' ' . esc_attr($className) : '')
-        .'"'.($blockID==''?'':' id="ub-tabbed-content-'.$blockID.'"').'><div class="'.$blockName.'-tab-holder">
-    <div class="'.$blockName.'-tabs-title">'.
+    return '<div class="'.$blockName.' '.$blockName.'-holder '.($tabVertical ? 'vertical-holder' : '').(isset($className) ? ' ' . esc_attr($className) : '')
+        .'"'.($blockID==''?'':' id="ub-tabbed-content-'.$blockID.'"').'><div class="'.$blockName.'-tab-holder '.($tabVertical ? 'vertical-tab-width' : '').'">
+    <div class="'.$blockName.'-tabs-title'.($tabVertical ? '-vertical-tab' : '').'">'.
     $tabs.'</div>
     <div class="'.$blockName.'-scroll-button-container ub-hide">
     <button class="'.$blockName.'-scroll-button-left">
-    <span class="dashicons dashicons-arrow-left-alt2"></span></button>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20px" height="20px">
+        <path d="M14 5l-5 5 5 5-1 2-7-7 7-7z" fill="#ffffff"/>
+    </svg>
+    </button>
     <button class="'.$blockName.'-scroll-button-right">
-    <span class="dashicons dashicons-arrow-right-alt2"></span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20px" height="20px">
+        <path d="M6 15l5-5-5-5 1-2 7 7-7 7z" fill="#ffffff"/>
+    </svg>
     </button></div></div>
-    <div class="'.$blockName.'-tabs-content">'.
+    <div class="'.$blockName.'-tabs-content '.($tabVertical ? 'vertical-content-width' : '').'">'.
     $contents.'</div>
 </div>';
 }
@@ -65,14 +70,21 @@ function ub_register_tabbed_content_block(){
 }
 
 function ub_tabbed_content_add_frontend_assets() {
-    if ( has_block( 'ub/tabbed-content') or has_block('ub/tabbed-content-block') ) {
-        wp_enqueue_script(
-            'ultimate_blocks-tabbed-content-front-script',
-            plugins_url( 'tabbed-content/front.build.js', dirname( __FILE__ ) ),
-            array(),
-            Ultimate_Blocks_Constants::plugin_version(),
-            true
-        );
+    require_once dirname(dirname(__DIR__)) . '/common.php';
+
+    $presentBlocks = ub_getPresentBlocks();
+
+    foreach( $presentBlocks as $block ){
+        if($block['blockName'] == 'ub/tabbed-content' || $block['blockName'] == 'ub/tabbed-content-block'){
+            wp_enqueue_script(
+                'ultimate_blocks-tabbed-content-front-script',
+                plugins_url( 'tabbed-content/front.build.js', dirname( __FILE__ ) ),
+                array(),
+                Ultimate_Blocks_Constants::plugin_version(),
+                true
+            );
+            break;
+        }
     }
 }
 

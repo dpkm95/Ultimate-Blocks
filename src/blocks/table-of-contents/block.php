@@ -30,25 +30,33 @@ function ub_render_table_of_contents_block($attributes){
         }
     }
 
-    while(count($sortedHeaders) > 1 &&
-        $sortedHeaders[count($sortedHeaders) - 1][0]['level'] > $sortedHeaders[count($sortedHeaders) - 2][0]['level']){
-        array_push($sortedHeaders[count($sortedHeaders) - 2], array_pop($sortedHeaders));
+    if(count($sortedHeaders) > 0){
+        while(count($sortedHeaders) > 1 &&
+            $sortedHeaders[count($sortedHeaders) - 1][0]['level'] > $sortedHeaders[count($sortedHeaders) - 2][0]['level']){
+            array_push($sortedHeaders[count($sortedHeaders) - 2], array_pop($sortedHeaders));
+        }
+        $sortedHeaders = $sortedHeaders[0];
     }
-
-    $sortedHeaders = $sortedHeaders[0];
 
     $listItems = '';
 
     if (!function_exists('ub_makeListItem')) {
-        function ub_makeListItem($num, $item, $listStyle, $blockID){
+        function ub_makeListItem($num, $item, $listStyle, $blockID, $gaps){
             static $outputString = '';
             if($num == 0 && $outputString != ''){
                 $outputString = '';
             }
             if (array_key_exists("level", $item)){
-                $anchor = $item["anchor"];
+                $anchor = '#' . $item["anchor"];
+
+                if(get_query_var('page') != $gaps[$num]){
+                    $baseURL = get_permalink();
+                    $anchor = $baseURL . ($gaps[$num] > 1 ? (get_post_status(get_the_ID()) == 'publish' ? '' : '&page=')
+                            . $gaps[$num] : '') . $anchor;
+                }
+
                 $content = $item["content"];
-                $outputString .= '<li><a href="#'.$anchor.'">'. $content .'</a></li>';
+                $outputString .= '<li><a href='. $anchor.'>'. $content .'</a></li>';
             }
             else{
                 $openingTag = $listStyle == 'numbered' ? '<ol>' :
@@ -58,7 +66,7 @@ function ub_render_table_of_contents_block($attributes){
                     strrpos($outputString, '</li>'), strlen('</li>'));
 
                 forEach($item as $key => $subItem){
-                    ub_makeListItem($key+1, $subItem, $listStyle, $blockID);
+                    ub_makeListItem($key+1, $subItem, $listStyle, $blockID, $gaps);
                 }
                 $outputString .= ($listStyle == 'numbered' ? '</ol>' : '</ul>') . '</li>';
             }
@@ -66,8 +74,10 @@ function ub_render_table_of_contents_block($attributes){
         }
     }
 
-    foreach($sortedHeaders as $key => $item){
-        $listItems = ub_makeListItem($key, $item, $listStyle, $blockID);
+    if(count($sortedHeaders) > 0){
+        foreach($sortedHeaders as $key => $item){
+            $listItems = ub_makeListItem($key, $item, $listStyle, $blockID, $gaps);
+        }
     }
 
     return '<div class="ub_table-of-contents'.(isset($className) ? ' ' . esc_attr($className) : '')
@@ -76,11 +86,11 @@ function ub_render_table_of_contents_block($attributes){
                 .'"'.($blockID==''?'':' id="ub_table-of-contents-'.$blockID.'"').'>'.
                 (strlen($title) > 0 ? ('<div class="ub_table-of-contents-header">
                     <div class="ub_table-of-contents-title">'.
-                        $title .'</div>'.
+                        $title .'</div>'. 
                     ($allowToCHiding ?
                     '<div id="ub_table-of-contents-header-toggle">
                         <div id="ub_table-of-contents-toggle">
-                            [<a class="ub_table-of-contents-toggle-link" href="#">'.
+                        &nbsp;[<a class="ub_table-of-contents-toggle-link" href="#">'.
                             __($showList ? 'hide' : 'show')
                             .'</a>]</div></div>' :'')
                 .'</div>') : '')
@@ -103,14 +113,20 @@ function ub_register_table_of_contents_block() {
 }
 
 function ub_table_of_contents_add_frontend_assets() {
-    if ( has_block( 'ub/table-of-contents' ) or has_block( 'ub/table-of-contents-block' ) ) {
-        wp_enqueue_script(
-            'ultimate_blocks-table-of-contents-front-script',
-            plugins_url( 'table-of-contents/front.build.js', dirname( __FILE__ ) ),
-            array( ),
-            Ultimate_Blocks_Constants::plugin_version(),
-            true
-        );
+    require_once dirname(dirname(__DIR__)) . '/common.php';
+
+    $presentBlocks = ub_getPresentBlocks();
+
+    foreach( $presentBlocks as $block ){
+        if($block['blockName'] == 'ub/table-of-contents' || $block['blockName'] == 'ub/table-of-contents-block'){
+            wp_enqueue_script(
+                'ultimate_blocks-table-of-contents-front-script',
+                plugins_url( 'table-of-contents/front.build.js', dirname( __FILE__ ) ),
+                array( ),
+                Ultimate_Blocks_Constants::plugin_version(),
+                true
+            );
+        }
     }
 }
 

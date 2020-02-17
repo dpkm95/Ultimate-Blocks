@@ -1,252 +1,168 @@
 const { __ } = wp.i18n;
 
 const { registerBlockType } = wp.blocks;
-const { RichText, BlockControls, InspectorControls, ColorPalette } = wp.editor;
-const { Toolbar, IconButton, Dropdown, PanelBody } = wp.components;
-const { withState } = wp.compose;
+const {
+	RichText,
+	InspectorControls,
+	ColorPalette,
+	AlignmentToolbar,
+	BlockControls
+} = wp.blockEditor || wp.editor;
+const { IconButton, Dropdown, PanelBody, RangeControl } = wp.components;
+const { withState, compose } = wp.compose;
+const { withSelect } = wp.data;
 
-import { dashesToCamelcase } from '../../common';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { fas } from '@fortawesome/free-solid-svg-icons';
-import { fab } from '@fortawesome/free-brands-svg-icons';
-import icon, { decreaseIndentIcon, increaseIndentIcon } from './icon';
-import { Component } from 'react';
+import { dashesToCamelcase } from "../../common";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+import { fab } from "@fortawesome/free-brands-svg-icons";
+import icon from "./icon";
 
-import './editor.scss';
-import './style.scss';
-
-import { library } from '@fortawesome/fontawesome-svg-core';
+import { library } from "@fortawesome/fontawesome-svg-core";
 
 library.add(fas, fab);
 
-const cloneObject = obj => JSON.parse(JSON.stringify(obj));
-
-class StyledList extends Component {
-	constructor(props) {
-		super(props);
-	}
-	render() {
-		const {
-			list,
-			updateList,
-			iconColor,
-			updateSelectedItem,
-			increaseIndent,
-			decreaseIndent,
-			edits
-		} = this.props;
-
-		const deleteItem = i => {
-			let newList = cloneObject(list);
-			let j = i + 1;
-			while (
-				j < newList.length &&
-				newList[j].indent > newList[j - 1].indent
-			) {
-				newList[j].indent--;
-				j++;
-			}
-			updateList([...newList.slice(0, i), ...newList.slice(i + 1)]);
-		};
-
-		return (
-			<ul className="fa-ul" key={edits}>
-				{list.map((item, i) => (
-					<li
-						style={{
-							left: `${item.indent + 0.5}em`,
-							width: `calc(100% - ${item.indent + 0.5}em)`
-						}}
-						onKeyDown={e => {
-							switch (e.key) {
-								case 'Tab':
-									e.preventDefault();
-									if (i > 0) {
-										if (e.shiftKey) {
-											decreaseIndent(i);
-										} else {
-											increaseIndent(i);
-										}
-									}
-									break;
-								case 'Backspace':
-								case 'Delete':
-									if (
-										item.text.length === 0 &&
-										list.length > 1
-									) {
-										deleteItem(i);
-									}
-									break;
-								default:
-									break;
-							}
-						}}
-					>
-						<div>
-							<span className="fa-li">
-								<FontAwesomeIcon
-									icon={
-										Object.keys(fas)
-											.filter(
-												iconName =>
-													fas[iconName].prefix ===
-													'fas'
-											)
-											.includes(
-												`fa${dashesToCamelcase(
-													item.selectedIcon
-												)}`
-											)
-											? item.selectedIcon
-											: ['fab', item.selectedIcon]
-									}
-									color={iconColor}
-								/>
-							</span>
-							<RichText
-								className={'styled-list-item'}
-								style={{
-									width: `calc(100% - ${item.indent + 0.5}em)`
-								}}
-								value={item.text}
-								multiline={false}
-								onChange={newValue => {
-									let newList = cloneObject(list);
-									newList[i].text = newValue;
-									updateList(newList);
-								}}
-								unstableOnFocus={() => updateSelectedItem(i)}
-								onSplit={(before, after) => {
-									updateList([
-										...list.slice(0, i),
-										Object.assign(cloneObject(list[i]), {
-											text: before
-										}),
-										Object.assign(cloneObject(list[i]), {
-											text: after
-										}),
-										...list.slice(i + 1)
-									]);
-								}}
-							/>
-							<div
-								className="dashicons dashicons-trash"
-								onClick={_ => deleteItem(i)}
-							/>
-						</div>
-					</li>
-				))}
-			</ul>
-		);
-	}
-}
-
 const allIcons = Object.assign(fas, fab);
 
-registerBlockType('ub/styled-list', {
-	title: __('Styled List'),
+registerBlockType("ub/styled-list", {
+	title: __("Styled List"),
 	icon: icon,
-	category: 'ultimateblocks',
+	category: "ultimateblocks",
 	attributes: {
+		blockID: {
+			type: "string",
+			default: ""
+		},
+		list: {
+			type: "text",
+			default: [...Array(3).keys()]
+				.map(i => `<li>${__(`Item ${i + 1}`)}</li>`)
+				.join()
+		},
+		//retained for reverse compatibility
 		listItem: {
-			type: 'array',
-			default: [{ text: '', selectedIcon: 'check', indent: 0 }]
+			type: "array",
+			default: Array(3).fill({
+				text: "",
+				selectedIcon: "check",
+				indent: 0
+			})
+		},
+		selectedIcon: {
+			type: "string",
+			default: "check"
+		},
+		alignment: {
+			type: "string",
+			default: "left"
 		},
 		iconColor: {
-			type: 'string',
-			default: '#000000'
+			type: "string",
+			default: "#000000"
+		},
+		iconSize: {
+			type: "number",
+			default: 5
 		}
 	},
-	keywords: [__('List'), __('Styled List'), __('Ultimate Blocks')],
-	edit: withState({
-		selectedItem: -1,
-		availableIcons: [],
-		iconSearchTerm: '',
-		recentSelection: '',
-		edits: 0
-	})(function(props) {
+	keywords: [__("List"), __("Styled List"), __("Ultimate Blocks")],
+	edit: compose([
+		withState({
+			availableIcons: [],
+			iconSearchTerm: "",
+			recentSelection: "",
+			edits: 0
+		}),
+		withSelect((select, ownProps) => ({
+			block: (select("core/block-editor") || select("core/editor")).getBlock(
+				ownProps.clientId
+			)
+		}))
+	])(function(props) {
 		const {
+			block,
 			isSelected,
 			attributes,
 			setAttributes,
 			setState,
-			selectedItem,
 			availableIcons,
 			iconSearchTerm,
 			edits
 		} = props;
-		const { listItem, iconColor } = attributes;
+		const {
+			list,
+			listItem,
+			alignment,
+			iconColor,
+			iconSize,
+			selectedIcon,
+			blockID
+		} = attributes;
+
 		if (availableIcons.length === 0) {
 			const iconList = Object.keys(allIcons).sort();
 			setState({ availableIcons: iconList.map(name => allIcons[name]) });
 		}
 
-		const increaseIndent = itemNumber => {
-			let newListItem = cloneObject(listItem);
-			if (
-				newListItem[itemNumber].indent <=
-				newListItem[itemNumber - 1].indent
-			) {
-				newListItem[itemNumber].indent++;
-			}
-			setAttributes({ listItem: newListItem });
-			setState({ edits: edits + 1 });
-		};
+		if (blockID !== block.clientId) {
+			setAttributes({ blockID: block.clientId });
+		}
 
-		const decreaseIndent = itemNumber => {
-			let newListItem = cloneObject(listItem);
-			if (newListItem[itemNumber].indent > 0) {
-				newListItem[itemNumber].indent--;
-				let i = itemNumber + 1;
+		if (
+			JSON.stringify(listItem) !==
+			`[${Array(3)
+				.fill('{"text":"","selectedIcon":"check","indent":0}')
+				.join(",")}]`
+		) {
+			let newList = "";
 
-				while (
-					i < newListItem.length &&
-					newListItem[i - 1].indent + 1 < newListItem[i].indent
-				) {
-					newListItem[i].indent--;
-					i++;
+			listItem.forEach((item, i) => {
+				let insertionPoint = newList.length;
+
+				for (let j = 0; j < item.indent; j++) {
+					let ulPosition = newList.lastIndexOf("</ul>", insertionPoint - 1);
+					if (ulPosition > -1 && newList.lastIndexOf("<li>") < ulPosition) {
+						insertionPoint = ulPosition;
+					} else {
+						insertionPoint -= 5;
+						break;
+					}
 				}
-			}
-			setAttributes({ listItem: newListItem });
-			setState({ edits: edits + 1 });
-		};
+
+				let insertedItem =
+					i === 0 || item.indent <= listItem[i - 1].indent
+						? `<li>${item.text}</li>`
+						: `<ul class="fa-ul"><li>${item.text}</li></ul>`;
+
+				newList = [
+					newList.slice(0, insertionPoint),
+					insertedItem,
+					newList.slice(insertionPoint)
+				].join("");
+			});
+
+			setAttributes({
+				selectedIcon: listItem[0].selectedIcon,
+				list: newList,
+				listItem: Array(3).fill({
+					text: "",
+					selectedIcon: "check",
+					indent: 0
+				})
+			});
+		}
 
 		return [
 			isSelected && (
-				<BlockControls>
-					<Toolbar>
-						<IconButton
-							icon={decreaseIndentIcon}
-							label={__('Decrease indent')}
-							onClick={() => {
-								if (selectedItem > 0) {
-									decreaseIndent(selectedItem);
-								}
-							}}
-						/>
-						<IconButton
-							icon={increaseIndentIcon}
-							label={__('Increase indent')}
-							onClick={() => {
-								if (selectedItem > 0) {
-									increaseIndent(selectedItem);
-								}
-							}}
-						/>
-					</Toolbar>
-				</BlockControls>
-			),
-			isSelected && (
 				<InspectorControls>
-					<PanelBody title={__('Icon Options')}>
+					<PanelBody title={__("Icon Options")}>
 						<div
 							style={{
-								display: 'grid',
-								gridTemplateColumns: '5fr 1fr'
+								display: "grid",
+								gridTemplateColumns: "5fr 1fr"
 							}}
 						>
-							<p>{__('Selected icon')}</p>
+							<p>{__("Selected icon")}</p>
 							{listItem.length > 0 && (
 								<Dropdown
 									position="bottom right"
@@ -257,31 +173,17 @@ registerBlockType('ub/styled-list', {
 													icon={
 														Object.keys(fas)
 															.filter(
-																iconName =>
-																	fas[
-																		iconName
-																	].prefix ===
-																	'fas'
+																iconName => fas[iconName].prefix === "fas"
 															)
-															.includes(
-																`fa${dashesToCamelcase(
-																	listItem[0]
-																		.selectedIcon
-																)}`
-															)
-															? listItem[0]
-																	.selectedIcon
-															: [
-																	'fab',
-																	listItem[0]
-																		.selectedIcon
-															  ]
+															.includes(`fa${dashesToCamelcase(selectedIcon)}`)
+															? selectedIcon
+															: ["fab", selectedIcon]
 													}
 													color={iconColor}
 													size="lg"
 												/>
 											}
-											label={__('Select icon for list')}
+											label={__("Select icon for list")}
 											onClick={onToggle}
 											aria-expanded={isOpen}
 										/>
@@ -293,49 +195,27 @@ registerBlockType('ub/styled-list', {
 												value={iconSearchTerm}
 												onChange={e =>
 													setState({
-														iconSearchTerm:
-															e.target.value
+														iconSearchTerm: e.target.value
 													})
 												}
 											/>
 											<br />
 											{availableIcons.length > 0 &&
 												availableIcons
-													.filter(i =>
-														i.iconName.includes(
-															iconSearchTerm
-														)
-													)
+													.filter(i => i.iconName.includes(iconSearchTerm))
 													.map(i => (
 														<IconButton
 															className="ub-styled-list-available-icon"
-															icon={
-																<FontAwesomeIcon
-																	icon={i}
-																	size="lg"
-																/>
-															}
+															icon={<FontAwesomeIcon icon={i} size="lg" />}
 															label={i.iconName}
 															onClick={() => {
-																let newListItem = cloneObject(
-																	listItem
-																);
-																newListItem.forEach(
-																	item => {
-																		item.selectedIcon =
-																			i.iconName;
-																	}
-																);
 																setState({
-																	recentSelection:
-																		i.iconName,
-																	edits:
-																		edits +
-																		1
+																	recentSelection: i.iconName,
+																	edits: edits + 1
 																});
 
 																setAttributes({
-																	listItem: newListItem
+																	selectedIcon: i.iconName
 																});
 															}}
 														/>
@@ -345,51 +225,74 @@ registerBlockType('ub/styled-list', {
 								/>
 							)}
 						</div>
-						<p>{__('Icon color')}</p>
+						<p>{__("Icon color")}</p>
 						<ColorPalette
 							value={iconColor}
-							onChange={colorValue =>
-								setAttributes({ iconColor: colorValue })
-							}
+							onChange={colorValue => setAttributes({ iconColor: colorValue })}
+						/>
+						<p>{__("Icon size")}</p>
+						<RangeControl
+							value={iconSize}
+							onChange={iconSize => setAttributes({ iconSize })}
+							min={1}
+							max={10}
 						/>
 					</PanelBody>
 				</InspectorControls>
 			),
-			<div className="ub-styled-list">
-				<StyledList
-					edits={edits}
-					list={listItem}
-					updateList={newList => {
-						setAttributes({ listItem: newList });
-						if (newList.length !== listItem.length) {
-							setState({ edits: edits + 1 });
-						}
+
+			isSelected && (
+				<BlockControls>
+					<AlignmentToolbar
+						value={alignment}
+						onChange={value => {
+							setAttributes({ alignment: value });
+						}}
+					/>
+				</BlockControls>
+			),
+
+			<div
+				className="ub-styled-list"
+				id={`ub-styled-list-${blockID}`}
+				style={{
+					justifyContent:
+						alignment === "center"
+							? "center"
+							: `flex-${alignment === "left" ? "start" : "end"}`
+				}}
+			>
+				<RichText
+					className="fa-ul"
+					multiline="li"
+					tagName="ul"
+					value={list}
+					onChange={newList => {
+						newList = newList.replace("<ul>", '<ul class="fa-ul">');
+						setAttributes({ list: newList });
 					}}
-					iconColor={iconColor}
-					updateSelectedItem={newSelectedItem => {
-						setState({ selectedItem: newSelectedItem });
-					}}
-					increaseIndent={itemNumber => increaseIndent(itemNumber)}
-					decreaseIndent={itemNumber => decreaseIndent(itemNumber)}
 				/>
-				<button
-					onClick={_ =>
-						setAttributes({
-							listItem: [
-								...listItem,
-								{
-									text: '',
-									selectedIcon:
-										listItem[listItem.length - 1]
-											.selectedIcon,
-									indent: listItem[listItem.length - 1].indent
-								}
-							]
-						})
-					}
-				>
-					Add new item
-				</button>
+
+				<style
+					dangerouslySetInnerHTML={{
+						__html: `#ub-styled-list-${blockID} li:before{
+                content:''; 
+                position:relative;
+                left:-0.5em;
+                top: ${iconSize >= 5 ? 3 : iconSize < 3 ? 2 : 0}px;
+                display:inline-block; 
+                height:${(4 + iconSize) / 10}em; 
+                width:${(4 + iconSize) / 10}em; 
+                background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${
+									allIcons[`fa${dashesToCamelcase(selectedIcon)}`].icon[0]
+								} ${
+							allIcons[`fa${dashesToCamelcase(selectedIcon)}`].icon[1]
+						}' color='%23${iconColor.slice(1)}'><path fill='currentColor' d='${
+							allIcons[`fa${dashesToCamelcase(selectedIcon)}`].icon[4]
+						}'></path></svg>");
+				background-repeat: no-repeat;}`
+					}}
+				/>
 			</div>
 		];
 	}),
