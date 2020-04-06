@@ -7,7 +7,7 @@ if (!Element.prototype.matches) {
 }
 
 if (!Element.prototype.closest) {
-	Element.prototype.closest = function(s) {
+	Element.prototype.closest = function (s) {
 		let el = this;
 
 		do {
@@ -21,7 +21,7 @@ if (!Element.prototype.closest) {
 function ub_getSiblings(element, criteria) {
 	const children = Array.prototype.slice
 		.call(element.parentNode.children)
-		.filter(child => child !== element);
+		.filter((child) => child !== element);
 	return criteria ? children.filter(criteria) : children;
 }
 
@@ -49,13 +49,13 @@ function ub_handleTabEvent(tab) {
 		)
 		.getAttribute("style");
 
-	ub_getSiblings(tab, elem =>
+	ub_getSiblings(tab, (elem) =>
 		elem.classList.contains(
 			`wp-block-ub-tabbed-content-tab-title-${
 				isVertical ? "vertical-" : ""
 			}wrap`
 		)
-	).forEach(sibling => {
+	).forEach((sibling) => {
 		sibling.classList.remove("active");
 		if (defaultStyle) {
 			sibling.setAttribute("style", defaultStyle);
@@ -67,7 +67,7 @@ function ub_handleTabEvent(tab) {
 
 	const tabContentContainer = Array.prototype.slice
 		.call(parent.children)
-		.filter(elem =>
+		.filter((elem) =>
 			elem.classList.contains("wp-block-ub-tabbed-content-tabs-content")
 		)[0];
 
@@ -81,7 +81,7 @@ function ub_handleTabEvent(tab) {
 					tabContent.querySelectorAll(".ub_image_slider")
 				);
 
-				flickityInstances.forEach(instance => {
+				flickityInstances.forEach((instance) => {
 					let slider = Flickity.data(instance.querySelector("[data-flickity]"));
 					slider.resize();
 				});
@@ -96,8 +96,8 @@ Array.prototype.slice
 	.call(
 		document.getElementsByClassName("wp-block-ub-tabbed-content-tab-title-wrap")
 	)
-	.forEach(instance => {
-		instance.addEventListener("click", function() {
+	.forEach((instance) => {
+		instance.addEventListener("click", function () {
 			ub_handleTabEvent(instance);
 		});
 	});
@@ -108,8 +108,8 @@ Array.prototype.slice
 			"wp-block-ub-tabbed-content-tab-title-vertical-wrap"
 		)
 	)
-	.forEach(instance => {
-		instance.addEventListener("click", function() {
+	.forEach((instance) => {
+		instance.addEventListener("click", function () {
 			ub_handleTabEvent(instance);
 		});
 	});
@@ -120,7 +120,7 @@ Array.prototype.slice
 			"wp-block-ub-tabbed-content-scroll-button-container"
 		)
 	)
-	.forEach(scrollButtonContainer => {
+	.forEach((scrollButtonContainer) => {
 		const tabBar = scrollButtonContainer.previousElementSibling;
 		const leftScroll = scrollButtonContainer.querySelector(
 			".wp-block-ub-tabbed-content-scroll-button-left"
@@ -131,10 +131,10 @@ Array.prototype.slice
 		let scrollInterval;
 		let scrollCountdown;
 
-		const moveLeft = _ => (tabBar.scrollLeft -= 10);
-		const moveRight = _ => (tabBar.scrollLeft += 10);
+		const moveLeft = (_) => (tabBar.scrollLeft -= 10);
+		const moveRight = (_) => (tabBar.scrollLeft += 10);
 
-		const checkWidth = _ => {
+		const checkWidth = (_) => {
 			if (tabBar.scrollWidth > tabBar.clientWidth) {
 				scrollButtonContainer.classList.remove("ub-hide");
 			} else {
@@ -142,28 +142,53 @@ Array.prototype.slice
 			}
 		};
 
-		const resetTimers = _ => {
+		const resetTimers = (_) => {
 			clearTimeout(scrollCountdown);
 			clearTimeout(scrollInterval);
 		};
 
 		window.addEventListener("resize", checkWidth);
 
-		leftScroll.addEventListener("mousedown", _ => {
+		leftScroll.addEventListener("mousedown", (_) => {
 			moveLeft();
-			scrollCountdown = setTimeout(_ => {
+			scrollCountdown = setTimeout((_) => {
 				scrollInterval = setInterval(moveLeft, 50);
 			}, 500);
 		});
 		leftScroll.addEventListener("mouseup", resetTimers);
 
-		rightScroll.addEventListener("mousedown", _ => {
+		rightScroll.addEventListener("mousedown", (_) => {
 			moveRight();
-			scrollCountdown = setTimeout(_ => {
+			scrollCountdown = setTimeout((_) => {
 				scrollInterval = setInterval(moveRight, 50);
 			}, 500);
 		});
 		rightScroll.addEventListener("mouseup", resetTimers);
+
+		let tabBarIsBeingDragged = false;
+		let oldScrollPosition = -1;
+		let oldMousePosition = -1;
+
+		tabBar.addEventListener("mousedown", function (e) {
+			tabBarIsBeingDragged = true;
+			oldScrollPosition = tabBar.scrollLeft;
+			oldMousePosition = e.clientX - tabBar.getBoundingClientRect().x;
+		});
+		document.addEventListener("mouseup", function () {
+			if (tabBarIsBeingDragged) {
+				tabBarIsBeingDragged = false;
+				oldScrollPosition = -1;
+				oldMousePosition = -1;
+			}
+		});
+		document.addEventListener("mousemove", function (e) {
+			if (tabBarIsBeingDragged) {
+				e.preventDefault();
+				let newMousePosition = e.clientX - tabBar.getBoundingClientRect().x;
+				tabBar.scrollLeft =
+					oldScrollPosition - newMousePosition + oldMousePosition;
+			}
+		});
 
 		checkWidth();
 	});
